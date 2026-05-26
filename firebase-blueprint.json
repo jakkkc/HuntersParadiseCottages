@@ -1,0 +1,208 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and system role.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["Super Admin", "Senior Manager", "Manager", "Sales Executive"] },
+        "assignedBranch": { "type": "string", "enum": ["Cottages", "Tuuti", "Both"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "email", "name", "role", "assignedBranch"]
+    },
+    "Client": {
+      "title": "Client Profile",
+      "description": "Corporate client or individual guest profile.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "type": { "type": "string", "enum": ["corporate", "individual"] },
+        "companyName": { "type": "string" },
+        "fullName": { "type": "string" },
+        "industry": { "type": "string" },
+        "primaryContact": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "title": { "type": "string" },
+            "phone": { "type": "string" },
+            "email": { "type": "string" }
+          }
+        },
+        "secondaryContacts": { "type": "array" },
+        "physicalAddress": { "type": "string" },
+        "kraPin": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "idPassport": { "type": "string" },
+        "notes": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "branchPreference": { "type": "string" },
+        "negotiatedRates": { "type": "object" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["clientId", "type", "assignedTo"]
+    },
+    "PipelineDeal": {
+      "title": "Pipeline Deal",
+      "description": "Sales pipeline lead or opportunity.",
+      "type": "object",
+      "properties": {
+        "dealId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientType": { "type": "string", "enum": ["corporate", "individual"] },
+        "branch": { "type": "string", "enum": ["Cottages", "Tuuti"] },
+        "value": { "type": "number" },
+        "source": { "type": "string", "enum": ["Walk-in", "Phone", "Email", "WhatsApp", "Social Media", "Referral"] },
+        "assignedTo": { "type": "string" },
+        "stage": { "type": "string", "enum": ["Lead", "Inquiry", "Proposal", "Confirmed", "Checked In", "Completed"] },
+        "expectedDate": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "stageChangedAt": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["dealId", "clientName", "clientId", "branch", "value", "source", "assignedTo", "stage"]
+    },
+    "Quotation": {
+      "title": "Quotation",
+      "description": "Quotation generated from a pipeline deal.",
+      "type": "object",
+      "properties": {
+        "quotationId": { "type": "string" },
+        "dealId": { "type": "string" },
+        "quoteNumber": { "type": "string" },
+        "branch": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string" },
+        "clientPhone": { "type": "string" },
+        "companyName": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "total": { "type": "number" },
+        "validityPeriod": { "type": "number" },
+        "terms": { "type": "string" },
+        "status": { "type": "string", "enum": ["Draft", "Sent", "Accepted", "Rejected"] },
+        "createdBy": { "type": "string" },
+        "createdByName": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["quotationId", "dealId", "quoteNumber", "branch", "clientName", "items", "total", "status", "createdBy"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Manual room or event booking record.",
+      "type": "object",
+      "properties": {
+        "bookingId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "branch": { "type": "string", "enum": ["Cottages", "Tuuti"] },
+        "bookingType": { "type": "string", "enum": ["Room", "Event"] },
+        "roomType": { "type": "string" },
+        "checkInDate": { "type": "string" },
+        "checkOutDate": { "type": "string" },
+        "guestsCount": { "type": "number" },
+        "mealPlan": { "type": "string", "enum": ["None", "B&B Single", "B&B Double", "HB Single", "HB Double", "FB Single", "FB Double"] },
+        "specialRequests": { "type": "string" },
+        "paymentStatus": { "type": "string", "enum": ["Pending", "Partial", "Paid"] },
+        "amountDue": { "type": "number" },
+        "amountPaid": { "type": "number" },
+        "balance": { "type": "number" },
+        "source": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "dealId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["bookingId", "clientId", "clientName", "branch", "checkInDate", "checkOutDate", "amountDue", "amountPaid", "paymentStatus", "assignedTo"]
+    },
+    "RateCard": {
+      "title": "Rate Card",
+      "description": "Storage for editable rack rates (Super Admin only).",
+      "type": "object",
+      "properties": {
+        "branch": { "type": "string" },
+        "rooms": { "type": "object" },
+        "conferences": { "type": "object" },
+        "gymSwimming": { "type": "object" },
+        "excursions": { "type": "object" },
+        "updatedAt": { "type": "string" },
+        "updatedBy": { "type": "string" }
+      },
+      "required": ["branch"]
+    },
+    "MonthlyTarget": {
+      "title": "Monthly Target",
+      "description": "Monthly revenue targets set for sales team members.",
+      "type": "object",
+      "properties": {
+        "targetId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userName": { "type": "string" },
+        "year": { "type": "number" },
+        "month": { "type": "number" },
+        "targetValue": { "type": "number" },
+        "actualRevenue": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["targetId", "userId", "userEmail", "year", "month", "targetValue", "actualRevenue"]
+    },
+    "ActivityLog": {
+      "title": "Activity Log",
+      "description": "Unified historic activity log for clients or pipeline deals.",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string" },
+        "refId": { "type": "string" },
+        "type": { "type": "string", "enum": ["deal", "client", "booking", "quotation"] },
+        "action": { "type": "string" },
+        "performedBy": { "type": "string" },
+        "performedByName": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["logId", "refId", "type", "action", "performedBy", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Users inside the CRM hierarchy."
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Corporate or individual clients profiles."
+    },
+    "/pipeline/{dealId}": {
+      "schema": "PipelineDeal",
+      "description": "Deals in the Sales Pipeline Kanban/List."
+    },
+    "/quotations/{quotationId}": {
+      "schema": "Quotation",
+      "description": "Quotations generated off deals."
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Bookings records."
+    },
+    "/rate_cards/{cardId}": {
+      "schema": "RateCard",
+      "description": "Branch-specific rate cards."
+    },
+    "/targets/{targetId}": {
+      "schema": "MonthlyTarget",
+      "description": "Monthly targets per sales agent."
+    },
+    "/activity_logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Historical audit trails for timeline feeds."
+    }
+  }
+}

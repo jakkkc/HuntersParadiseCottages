@@ -1,0 +1,145 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnUid(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Role checks
+    function hasRole(role) {
+      return isSignedIn() && (
+        (role == 'Super Admin' && request.auth.token.email == 'jackson.munene@huntersparadise.ke') ||
+        (role == 'Senior Manager' && request.auth.token.email == 'calvince.okomo@huntersparadise.ke') ||
+        (role == 'Manager' && request.auth.token.email == 'jane.adala@huntersparadise.ke') ||
+        (role == 'Sales Executive' && request.auth.token.email == 'mildred@huntersparadise.ke') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role)
+      );
+    }
+
+    function isSuperAdmin() {
+      return hasRole('Super Admin');
+    }
+
+    function isSeniorManager() {
+      return hasRole('Senior Manager');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation schemas
+    function isValidUser(data) {
+      return data.userId is string && data.email is string && data.name is string && data.role is string;
+    }
+
+    function isValidClient(data) {
+      return data.clientId is string && data.type is string && (data.type == 'corporate' || data.type == 'individual') && data.assignedTo is string;
+    }
+
+    function isValidPipelineDeal(data) {
+      return data.dealId is string && data.clientName is string && data.value is number && data.stage is string && data.assignedTo is string && data.branch is string;
+    }
+
+    function isValidQuotation(data) {
+      return data.quotationId is string && data.dealId is string && data.total is number && data.status is string && data.createdBy is string;
+    }
+
+    function isValidBooking(data) {
+      return data.bookingId is string && data.clientId is string && data.branch is string && data.amountDue is number && data.assignedTo is string;
+    }
+
+    function isValidRateCard(data) {
+      return data.branch is string;
+    }
+
+    function isValidMonthlyTarget(data) {
+      return data.targetId is string && data.userId is string && data.targetValue is number;
+    }
+
+    function isValidActivityLog(data) {
+      return data.logId is string && data.refId is string && data.type is string && data.performedBy is string;
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      allow read: if isSignedIn() && (isOwnUid(userId) || isSuperAdmin() || isSeniorManager());
+      allow create: if isSignedIn() && isValidUser(incoming()) && (isOwnUid(userId) || isSuperAdmin());
+      allow update: if isSignedIn() && isValidUser(incoming()) && (
+        isSuperAdmin() || 
+        (isOwnUid(userId) && !incoming().diff(existing()).affectedKeys().hasAny(['role', 'email']))
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Clients Collection ---
+    match /clients/{clientId} {
+      allow read: if isSuperAdmin() || isSeniorManager() || (isSignedIn() && existing().assignedTo == request.auth.uid);
+      allow create: if isSignedIn() && isValidClient(incoming()) && (isSuperAdmin() || isSeniorManager() || incoming().assignedTo == request.auth.uid);
+      allow update: if isSignedIn() && isValidClient(incoming()) && (isSuperAdmin() || isSeniorManager() || existing().assignedTo == request.auth.uid);
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Pipeline Collection ---
+    match /pipeline/{dealId} {
+      allow read: if isSuperAdmin() || isSeniorManager() || (isSignedIn() && existing().assignedTo == request.auth.uid);
+      allow create: if isSignedIn() && isValidPipelineDeal(incoming()) && (isSuperAdmin() || isSeniorManager() || incoming().assignedTo == request.auth.uid);
+      allow update: if isSignedIn() && isValidPipelineDeal(incoming()) && (isSuperAdmin() || isSeniorManager() || existing().assignedTo == request.auth.uid);
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Quotations Collection ---
+    match /quotations/{quotationId} {
+      allow read: if isSuperAdmin() || isSeniorManager() || (isSignedIn() && existing().createdBy == request.auth.uid);
+      allow create: if isSignedIn() && isValidQuotation(incoming()) && (isSuperAdmin() || isSeniorManager() || incoming().createdBy == request.auth.uid);
+      allow update: if isSignedIn() && isValidQuotation(incoming()) && (isSuperAdmin() || isSeniorManager() || existing().createdBy == request.auth.uid);
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Bookings Collection ---
+    match /bookings/{bookingId} {
+      allow read: if isSuperAdmin() || isSeniorManager() || (isSignedIn() && existing().assignedTo == request.auth.uid);
+      allow create: if isSignedIn() && isValidBooking(incoming()) && (isSuperAdmin() || isSeniorManager() || incoming().assignedTo == request.auth.uid);
+      allow update: if isSignedIn() && isValidBooking(incoming()) && (isSuperAdmin() || isSeniorManager() || existing().assignedTo == request.auth.uid);
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Rate Cards Collection ---
+    match /rate_cards/{cardId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSuperAdmin() && isValidRateCard(incoming());
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Monthly Targets Collection ---
+    match /targets/{targetId} {
+      allow read: if isSuperAdmin() || isSeniorManager() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow create, update: if (isSuperAdmin() || isSeniorManager()) && isValidMonthlyTarget(incoming());
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Activity Logs Collection ---
+    match /activity_logs/{logId} {
+      allow read: if isSuperAdmin() || isSeniorManager() || isSignedIn();
+      allow create: if isSignedIn() && isValidActivityLog(incoming());
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+  }
+}
