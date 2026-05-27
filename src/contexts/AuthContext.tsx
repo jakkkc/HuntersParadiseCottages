@@ -163,10 +163,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         branch = 'Both';
       } else if (email === 'jane.adala@huntersparadise.ke') {
         role = 'Manager';
-        branch = 'Cottages';
+        branch = 'Both';
       } else if (email === 'mildred@huntersparadise.ke') {
         role = 'Sales Executive';
-        branch = 'Tuuti';
+        branch = 'Both';
       }
 
       if (userSnap.exists()) {
@@ -321,11 +321,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name = 'Calvince Okomo';
     } else if (email === 'jane.adala@huntersparadise.ke') {
       role = 'Manager';
-      branch = 'Cottages';
+      branch = 'Both';
       name = 'Jane Adala';
     } else if (email === 'mildred@huntersparadise.ke') {
       role = 'Sales Executive';
-      branch = 'Tuuti';
+      branch = 'Both';
       name = 'Mildred Executive';
     } else {
       role = 'Sales Executive';

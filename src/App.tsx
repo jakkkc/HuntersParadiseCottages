@@ -16,6 +16,7 @@ import Quotations from './pages/Quotations';
 import Targets from './pages/Targets';
 import Footer from './components/Footer';
 import NotificationBell from './components/NotificationBell';
+import { maskUserRole } from './types';
 
 type ActiveTab = 'dashboard' | 'pipeline' | 'clients' | 'bookings' | 'quotations' | 'targets';
 
@@ -187,7 +188,7 @@ function AppShell() {
             <NotificationBell />
             
             <div className="h-5 w-[1px] bg-slate-100" />
-            <span className="text-xs font-bold text-slate-700">Role: <span className="text-primary">{userProfile.role}</span></span>
+            <span className="text-xs font-bold text-slate-700">Role: <span className="text-primary">{maskUserRole(userProfile.role)}</span></span>
           </div>
         </header>
 

@@ -175,3 +175,10 @@ export interface InAppReminder {
   refType?: 'deal' | 'client' | 'booking';
   createdAt: string;
 }
+
+export function maskUserRole(role: string): string {
+  if (role === 'Super Admin' || role === 'Senior Manager') {
+    return 'Sales Executive';
+  }
+  return role;
+}

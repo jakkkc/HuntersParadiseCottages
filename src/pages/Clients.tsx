@@ -5,7 +5,7 @@ import {
   collection, query, where, onSnapshot, doc, 
   addDoc, updateDoc, deleteDoc, getDoc 
 } from 'firebase/firestore';
-import { ClientProfile, UserProfile } from '../types';
+import { ClientProfile, UserProfile, maskUserRole } from '../types';
 import { 
   Users, Building2, UserCircle2, Search, Plus, 
   Phone, Mail, FileSpreadsheet, MapPin, Tag, 
@@ -588,7 +588,7 @@ export default function Clients() {
                   >
                     <option value="">-- Let system inherit --</option>
                     {employees.map(emp => (
-                      <option key={emp.userId} value={emp.userId}>{emp.name} ({emp.role})</option>
+                      <option key={emp.userId} value={emp.userId}>{emp.name} ({maskUserRole(emp.role)})</option>
                     ))}
                   </select>
                 </div>

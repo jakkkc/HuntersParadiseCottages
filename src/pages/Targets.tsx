@@ -5,7 +5,7 @@ import {
   collection, query, where, onSnapshot, doc, 
   setDoc, updateDoc, getDoc 
 } from 'firebase/firestore';
-import { MonthlyTarget, UserProfile } from '../types';
+import { MonthlyTarget, UserProfile, maskUserRole } from '../types';
 import { 
   Target, Users, Award, DollarSign, Calendar, Edit, 
   Settings, CheckCircle2, TrendingUp, Sparkles, Building
@@ -224,7 +224,7 @@ export default function Targets() {
                       </div>
                       <div>
                         <strong className="text-xs text-slate-800 block font-bold leading-snug">{emp.name}</strong>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">{emp.email} • <span className="text-primary font-bold">{emp.role}</span></span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">{emp.email} • <span className="text-primary font-bold">{maskUserRole(emp.role)}</span></span>
                       </div>
                     </div>
 

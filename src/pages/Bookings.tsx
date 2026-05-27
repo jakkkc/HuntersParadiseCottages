@@ -5,7 +5,7 @@ import {
   collection, query, where, onSnapshot, doc, 
   addDoc, updateDoc, deleteDoc, getDoc 
 } from 'firebase/firestore';
-import { Booking, ClientProfile, UserProfile } from '../types';
+import { Booking, ClientProfile, UserProfile, maskUserRole } from '../types';
 import { 
   Calendar, CheckCircle, Clock, Plus, Search, 
   MapPin, Users, DollarSign, ArrowRightLeft, 
@@ -487,7 +487,7 @@ export default function Bookings() {
                   >
                     <option value="">-- Assigned To Me --</option>
                     {employees.map(emp => (
-                      <option key={emp.userId} value={emp.userId}>{emp.name} ({emp.role})</option>
+                      <option key={emp.userId} value={emp.userId}>{emp.name} ({maskUserRole(emp.role)})</option>
                     ))}
                   </select>
                 </div>

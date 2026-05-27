@@ -50,19 +50,20 @@ service cloud.firestore {
     }
 
     function isValidClient(data) {
-      return data.clientId is string && data.type is string && (data.type == 'corporate' || data.type == 'individual') && data.assignedTo is string;
+      return (!('clientId' in data) || data.clientId is string) && data.type is string && (data.type == 'corporate' || data.type == 'individual') && data.assignedTo is string;
     }
 
     function isValidPipelineDeal(data) {
-      return data.dealId is string && data.clientName is string && data.value is number && data.stage is string && data.assignedTo is string && data.branch is string;
+      return (!('dealId' in data) || data.dealId is string) && data.clientName is string && data.value is number && data.stage is string && data.assignedTo is string && data.branch is string;
     }
 
     function isValidQuotation(data) {
-      return data.quotationId is string && data.dealId is string && data.total is number && data.status is string && data.createdBy is string;
+      return (!('quotationId' in data) || data.quotationId is string) && (!('dealId' in data) || data.dealId is string) && data.total is number && data.status is string && data.createdBy is string;
     }
 
+    // Bookings uses agreedPrice in code, support both or optional
     function isValidBooking(data) {
-      return data.bookingId is string && data.clientId is string && data.branch is string && data.amountDue is number && data.assignedTo is string;
+      return (!('bookingId' in data) || data.bookingId is string) && data.clientId is string && data.branch is string && (!('amountDue' in data) || data.amountDue is number) && (!('agreedPrice' in data) || data.agreedPrice is number) && data.assignedTo is string;
     }
 
     function isValidRateCard(data) {
@@ -70,11 +71,11 @@ service cloud.firestore {
     }
 
     function isValidMonthlyTarget(data) {
-      return data.targetId is string && data.userId is string && data.targetValue is number;
+      return (!('targetId' in data) || data.targetId is string) && data.userId is string && data.targetValue is number;
     }
 
     function isValidActivityLog(data) {
-      return data.logId is string && data.refId is string && data.type is string && data.performedBy is string;
+      return (!('logId' in data) || data.logId is string) && data.refId is string && data.type is string && data.performedBy is string;
     }
 
     // --- Users Collection ---
@@ -140,6 +141,11 @@ service cloud.firestore {
       allow create: if isSignedIn() && isValidActivityLog(incoming());
       allow update: if isSuperAdmin();
       allow delete: if isSuperAdmin();
+    }
+
+    // --- In-App Reminders Collection ---
+    match /in_app_reminders/{reminderId} {
+      allow read, create, update, delete: if isSignedIn();
     }
   }
 }
