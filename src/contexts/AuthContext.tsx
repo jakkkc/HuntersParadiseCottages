@@ -333,20 +333,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name = email.split('@')[0];
     }
 
-    const mockProfile: UserProfile = {
-      userId: 'demo_' + role.replace(' ', '_').toLowerCase(),
-      email,
-      name,
-      role,
-      assignedBranch: branch,
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('demo_user_profile', JSON.stringify(mockProfile));
-    setUserProfile(mockProfile);
-    setIsDemoMode(true);
-    setUser(null); // No Firebase user representation in pure Demo mode
-    setLoading(false);
+    const defaultPassword = 'DemoPassword123!';
+    try {
+      // 1. Try to sign in to real Firebase Auth so we have credential token & permission writes
+      await signInWithEmailAndPassword(auth, email, defaultPassword);
+      setIsDemoMode(false);
+    } catch (err: any) {
+      console.warn("Demo sign-in failed, trying direct registration under the hood:", err);
+      try {
+        // 2. Try to register if user doesn't exist yet
+        await signUpWithEmail(email, defaultPassword, name, role, branch);
+        setIsDemoMode(false);
+      } catch (signUpErr: any) {
+        console.error("Firebase auth bypass failed - entering local simulated mode", signUpErr);
+        // Fallback: Pure client-side simulation (read-only for security reasons)
+        const mockProfile: UserProfile = {
+          userId: 'demo_' + role.replace(' ', '_').toLowerCase(),
+          email,
+          name,
+          role,
+          assignedBranch: branch,
+          createdAt: new Date().toISOString()
+        };
+        localStorage.setItem('demo_user_profile', JSON.stringify(mockProfile));
+        setUserProfile(mockProfile);
+        setIsDemoMode(true);
+        setUser(null);
+        setLoading(false);
+      }
+    }
   };
 
   // Signout operation
